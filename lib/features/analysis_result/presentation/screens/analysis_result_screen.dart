@@ -11,6 +11,7 @@ import '../../../../core/domain/enums/decision_type.dart';
 import '../../../../core/domain/models/analysis_result.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/services/file_saver.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../monetization/presentation/providers/credits_provider.dart';
 import '../widgets/confidence_score_card.dart';
 import '../widgets/pros_cons_section.dart';
@@ -95,7 +96,7 @@ class _AnalysisResultScreenState
     final canAnalyze = await creditsRepo.consumeCredit();
     if (!canAnalyze) {
       setState(() {
-        _error = 'You have no credits remaining. Watch a rewarded ad or upgrade your plan to continue.';
+        _error = context.l10n.analysisCreditError;
         _isLoading = false;
       });
       return;
@@ -119,9 +120,7 @@ class _AnalysisResultScreenState
 
       if (apiKey == null || apiKey.isEmpty) {
         setState(() {
-          _error =
-              'No API key configured for ${providerType.displayName}. '
-              'Go to Settings to add your key.';
+          _error = context.l10n.analysisNoApiKey(providerType.displayName);
           _isLoading = false;
         });
         return;
@@ -229,7 +228,7 @@ class _AnalysisResultScreenState
           content: const Text('PDF export is available on Premium and Pro plans'),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
-            label: 'Upgrade',
+            label: context.l10n.analysisUpgrade,
             onPressed: () => context.go(AppRoutes.upgrade),
           ),
         ),
@@ -269,21 +268,15 @@ class _AnalysisResultScreenState
       if (saved) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('PDF saved as $fileName'),
+            content: Text(context.l10n.analysisPdfSaved(fileName)),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Could not save PDF. Try a different browser.'),
+            content: Text(context.l10n.analysisPdfFailed),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
           ),
         );
       }
@@ -291,11 +284,8 @@ class _AnalysisResultScreenState
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('PDF export failed: ${e.toString()}'),
+          content: Text(context.l10n.analysisPdfExportFailed(e.toString())),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
         ),
       );
     } finally {
@@ -325,12 +315,11 @@ class _AnalysisResultScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Decision Analysis'),
+        title: Text(context.l10n.analysisTitle),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxWidth =
-              constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
+          final maxWidth = constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Center(
@@ -359,22 +348,28 @@ class _AnalysisResultScreenState
   }
 
   Widget _buildLoadingState(ThemeData theme, ColorScheme colorScheme) {
+    final l = context.l10n;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 80),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: colorScheme.primary),
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(color: colorScheme.primary),
+          ),
           const SizedBox(height: 24),
           Text(
-            'Analyzing your decision...',
+            l.analysisAnalyzing,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'This may take a moment',
+            l.analysisPleaseWait,
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -385,20 +380,31 @@ class _AnalysisResultScreenState
   }
 
   Widget _buildErrorState(ThemeData theme, ColorScheme colorScheme) {
+    final l = context.l10n;
     final isCreditError = _error?.contains('credits') == true;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 80),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            isCreditError ? Icons.monetization_on_outlined : Icons.error_outline_rounded,
-            size: 48,
-            color: isCreditError ? Colors.amber.shade600 : colorScheme.error,
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isCreditError
+                  ? Colors.amber.withValues(alpha: 0.12)
+                  : colorScheme.errorContainer.withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isCreditError ? Icons.monetization_on_outlined : Icons.error_outline_rounded,
+              size: 40,
+              color: isCreditError ? Colors.amber.shade700 : colorScheme.error,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
-            isCreditError ? 'Insufficient Credits' : 'Analysis Failed',
+            isCreditError ? l.analysisInsufficientCredits : l.analysisFailed,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -411,26 +417,22 @@ class _AnalysisResultScreenState
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
+                height: 1.5,
               ),
             ),
           ),
           const SizedBox(height: 24),
           if (isCreditError)
-            Column(
-              children: [
-                FilledButton.icon(
-                  onPressed: () => context.go(AppRoutes.upgrade),
-                  icon: const Icon(Icons.workspace_premium_outlined),
-                  label: const Text('Upgrade Plan'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
+            FilledButton.icon(
+              onPressed: () => context.go(AppRoutes.upgrade),
+              icon: const Icon(Icons.workspace_premium_outlined),
+              label: Text(l.analysisUpgrade),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 12),
-              ],
+              ),
             ),
           if (!isCreditError)
             FilledButton.tonalIcon(
@@ -442,7 +444,7 @@ class _AnalysisResultScreenState
                 _analyze();
               },
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              label: Text(l.analysisRetry),
             ),
         ],
       ),
@@ -512,7 +514,7 @@ class _AnalysisResultScreenState
         ),
         const SizedBox(height: 12),
         _buildFooter(theme, colorScheme),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -522,6 +524,8 @@ class _AnalysisResultScreenState
     ColorScheme colorScheme,
     AnalysisResult r,
   ) {
+    final l = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -541,7 +545,7 @@ class _AnalysisResultScreenState
             ),
             const SizedBox(width: 6),
             Text(
-              'Analyzed with ${r.usedModel}',
+              l.analysisAnalyzedWith(r.usedModel),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -557,7 +561,7 @@ class _AnalysisResultScreenState
             ),
             const SizedBox(width: 12),
             Text(
-              _isExisting ? _formatDateTime(_analyzedAt) : 'Just now',
+              _isExisting ? _formatDateTime(_analyzedAt) : l.analysisJustNow,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -579,7 +583,7 @@ class _AnalysisResultScreenState
         ),
         const SizedBox(width: 6),
         Text(
-          'Analysis is for reference purposes',
+          context.l10n.analysisFooter,
           style: theme.textTheme.labelSmall?.copyWith(
             color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
           ),
@@ -666,7 +670,7 @@ class _BestChoiceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Best Choice',
+                    context.l10n.analysisBestChoice,
                     style: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: colorScheme.onTertiaryContainer,
@@ -716,7 +720,7 @@ class _RisksSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Risks to Consider',
+                  context.l10n.analysisRisks,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -790,7 +794,7 @@ class _ReasoningCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Analysis Reasoning',
+                  context.l10n.analysisReasoning,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),

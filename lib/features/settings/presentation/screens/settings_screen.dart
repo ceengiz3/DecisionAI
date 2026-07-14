@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/domain/enums/ai_provider_type.dart';
-
+import '../../../../l10n/l10n.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -54,7 +54,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${type.displayName} key saved'),
+        content: Text('${type.displayName} ${context.l10n.settingsSave}d'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -64,18 +64,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete API Key'),
-        content: Text(
-          'Remove ${type.displayName} API key?',
-        ),
+        title: Text(context.l10n.settingsDeleteKeyTitle),
+        content: Text(context.l10n.settingsDeleteKeyMessage(type.displayName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.settingsDelete),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(context.l10n.settingsDelete),
           ),
         ],
       ),
@@ -89,7 +87,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${type.displayName} key deleted'),
+        content: Text('${type.displayName} ${context.l10n.settingsDelete}d'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -99,15 +97,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l.settingsTitle),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxWidth =
-              constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
+          final maxWidth = constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             child: Center(
@@ -116,22 +114,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const _SectionHeader(title: 'AI Model', icon: Icons.model_training_rounded),
-                    const SizedBox(height: 8),
+                    _SectionHeader(title: l.settingsAiModel, icon: Icons.model_training_rounded),
+                    const SizedBox(height: 12),
                     _DefaultModelCard(),
-                    const SizedBox(height: 28),
-                    const _SectionHeader(title: 'API Keys', icon: Icons.key_rounded),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 32),
+                    _SectionHeader(title: l.settingsApiKeys, icon: Icons.key_rounded),
+                    const SizedBox(height: 12),
                     Text(
-                      'Enter your API keys for each provider. Keys are stored securely on your device.',
+                      l.settingsApiKeysHint,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     ...AiProviderType.values.map(
                       (type) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: _ApiKeyCard(
                           type: type,
                           controller: _keyControllers[type]!,
@@ -143,14 +141,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
-                    const _SectionHeader(title: 'Appearance', icon: Icons.palette_rounded),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 32),
+                    _SectionHeader(title: l.settingsAppearance, icon: Icons.palette_rounded),
+                    const SizedBox(height: 12),
                     _DarkModeCard(),
-                    const SizedBox(height: 28),
-                    const _SectionHeader(title: 'About', icon: Icons.info_outline_rounded),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 32),
+                    _SectionHeader(title: l.settingsAbout, icon: Icons.info_outline_rounded),
+                    const SizedBox(height: 12),
                     _AboutCard(),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -174,7 +173,7 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 18, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Text(
           title,
           style: theme.textTheme.titleSmall?.copyWith(
@@ -191,35 +190,38 @@ class _DefaultModelCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final currentModel = ref.watch(defaultModelProvider);
+    final l = context.l10n;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Default AI Model',
+              l.settingsDefaultModel,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Pre-selected model when creating a new decision',
+              l.settingsDefaultModelHint,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest
+                color: colorScheme.surfaceContainerHighest
                     .withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.colorScheme.outlineVariant,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -307,22 +309,24 @@ class _ApiKeyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
     final hasContent = controller.text.isNotEmpty;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: _colorFor(type).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _iconFor(type),
@@ -330,7 +334,7 @@ class _ApiKeyCard extends StatelessWidget {
                     color: _colorFor(type),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Text(
                   type.displayName,
                   style: theme.textTheme.titleSmall?.copyWith(
@@ -339,12 +343,12 @@ class _ApiKeyCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextFormField(
               controller: controller,
               obscureText: obscured,
               decoration: InputDecoration(
-                hintText: 'Enter your ${type.displayName} API key',
+                hintText: l.settingsApiKeyHint(type.displayName),
                 hintStyle: TextStyle(
                   fontSize: 13,
                   color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
@@ -355,7 +359,7 @@ class _ApiKeyCard extends StatelessWidget {
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 12,
+                  vertical: 14,
                 ),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -366,16 +370,16 @@ class _ApiKeyCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: FilledButton.tonalIcon(
                     onPressed: hasContent ? onSave : null,
                     icon: const Icon(Icons.save_rounded, size: 18),
-                    label: const Text('Save'),
+                    label: Text(l.settingsSave),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -384,11 +388,11 @@ class _ApiKeyCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 SizedBox(
-                  height: 40,
+                  height: 44,
                   child: OutlinedButton.icon(
                     onPressed: hasContent ? onDelete : null,
                     icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                    label: const Text('Delete'),
+                    label: Text(l.settingsDelete),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.error,
                       side: BorderSide(color: colorScheme.error.withValues(alpha: 0.3)),
@@ -438,13 +442,15 @@ class _DarkModeCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final currentMode = ref.watch(themeModeProvider);
+    final l = context.l10n;
 
     Widget modeTile(ThemeMode mode, String label, IconData icon) {
       final selected = currentMode == mode;
       return InkWell(
         onTap: () => ref.read(themeModeProvider.notifier).setThemeMode(mode),
         borderRadius: BorderRadius.circular(12),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: selected
@@ -453,7 +459,7 @@ class _DarkModeCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected
-                  ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                  ? theme.colorScheme.primary.withValues(alpha: 0.5)
                   : theme.colorScheme.outlineVariant,
             ),
           ),
@@ -488,23 +494,24 @@ class _DarkModeCard extends ConsumerWidget {
     }
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Theme',
+              l.settingsTheme,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
-            modeTile(ThemeMode.light, 'Light', Icons.light_mode_rounded),
+            const SizedBox(height: 16),
+            modeTile(ThemeMode.light, l.settingsLight, Icons.light_mode_rounded),
             const SizedBox(height: 8),
-            modeTile(ThemeMode.dark, 'Dark', Icons.dark_mode_rounded),
+            modeTile(ThemeMode.dark, l.settingsDark, Icons.dark_mode_rounded),
             const SizedBox(height: 8),
-            modeTile(ThemeMode.system, 'System', Icons.settings_rounded),
+            modeTile(ThemeMode.system, l.settingsSystem, Icons.settings_rounded),
           ],
         ),
       ),
@@ -517,21 +524,23 @@ class _AboutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     Icons.auto_awesome_rounded,
@@ -539,7 +548,7 @@ class _AboutCard extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -549,8 +558,9 @@ class _AboutCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      'Version ${AppConstants.appVersion}',
+                      l.settingsVersion(AppConstants.appVersion),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -559,9 +569,9 @@ class _AboutCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(12),
@@ -571,18 +581,16 @@ class _AboutCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.shield_rounded,
-                    size: 16,
+                    size: 18,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Your API keys are stored securely on your device using encrypted storage. '
-                      'No data is collected or transmitted to third parties. '
-                      'All AI analysis requests are sent directly to the chosen provider.',
+                      l.settingsPrivacy,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
-                        height: 1.4,
+                        height: 1.5,
                       ),
                     ),
                   ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
+
 class HistoryFilterSort extends StatelessWidget {
   final Set<String> availableModels;
   final String? selectedModel;
@@ -29,7 +31,7 @@ class HistoryFilterSort extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildChip(theme, colorScheme, 'All', null),
+                  _buildChip(theme, colorScheme, context.l10n.historyAll, null),
                   ...availableModels.map(
                     (model) => _buildChip(theme, colorScheme, model, model),
                   ),
@@ -46,10 +48,11 @@ class HistoryFilterSort extends StatelessWidget {
                 : Icons.arrow_downward_rounded,
             size: 20,
           ),
-          tooltip: sortAscending ? 'Oldest first' : 'Newest first',
+          tooltip: sortAscending
+              ? context.l10n.historyOldestFirst
+              : context.l10n.historyNewestFirst,
           style: IconButton.styleFrom(
-            backgroundColor:
-                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

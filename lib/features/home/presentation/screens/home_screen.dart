@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../monetization/presentation/widgets/usage_tracker_widget.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/hero_card.dart';
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
     );
     _heroAnimation = CurvedAnimation(
       parent: _controller,
@@ -51,34 +52,25 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DecisionAI'),
+        title: Text(l.homeTitle),
         actions: [
           const UsageTrackerWidget(),
           const SizedBox(width: 4),
           IconButton(
             icon: const Icon(Icons.workspace_premium_outlined),
-            tooltip: 'Upgrade Plan',
+            tooltip: l.homeUpgradePlan,
             onPressed: () => context.go(AppRoutes.upgrade),
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: 'Open Settings',
-            onPressed: () {
-              debugPrint('HOME_SCREEN: Settings button pressed, navigating to ${AppRoutes.settings}');
-              context.go(AppRoutes.settings);
-            },
+            tooltip: l.homeOpenSettings,
+            onPressed: () => context.go(AppRoutes.settings),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'settings_fab',
-        onPressed: () {
-          debugPrint('HOME_SCREEN: Settings FAB pressed, navigating to ${AppRoutes.settings}');
-          context.go(AppRoutes.settings);
-        },
-        child: const Icon(Icons.settings),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -115,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen>
                         parentAnimation: _controller,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../domain/enums/subscription_tier.dart';
 import '../../services/purchase_service.dart';
 import '../providers/credits_provider.dart';
@@ -12,11 +13,12 @@ class UpgradeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
     final currentTierAsync = ref.watch(subscriptionTierProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upgrade Plan'),
+        title: Text(l.upgradeTitle),
       ),
       body: currentTierAsync.when(
         data: (currentTier) => _buildContent(
@@ -40,6 +42,7 @@ class UpgradeScreen extends ConsumerWidget {
     final purchaseService = ref.watch(purchaseServiceProvider);
     final purchaseState = purchaseService.purchaseState.value;
     final isPurchasing = purchaseState.isPurchasing;
+    final l = context.l10n;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -54,14 +57,14 @@ class UpgradeScreen extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 8),
                   Text(
-                    'Choose Your Plan',
+                    l.upgradeChoosePlan,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Unlock more analyses and premium features',
+                    l.upgradeSubtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -95,14 +98,14 @@ class UpgradeScreen extends ConsumerWidget {
                     tier: SubscriptionTier.free,
                     price: 'Free',
                     isCurrent: currentTier == SubscriptionTier.free,
-                    features: const [
-                      '10 free analyses',
-                      'Ads supported',
-                      'Basic AI analysis',
+                    features: [
+                      l.freeTierFeature1,
+                      l.freeTierFeature2,
+                      l.freeTierFeature3,
                     ],
-                    limitations: const [
-                      'No PDF export',
-                      'No priority AI',
+                    limitations: [
+                      l.freeTierLimit1,
+                      l.freeTierLimit2,
                     ],
                     colorScheme: colorScheme,
                     theme: theme,
@@ -112,13 +115,13 @@ class UpgradeScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _PlanCard(
                     tier: SubscriptionTier.premium,
-                    price: '\$9.99/mo',
+                    price: l.premiumTierPrice,
                     isCurrent: currentTier == SubscriptionTier.premium,
-                    features: const [
-                      '300 analyses/month',
-                      'PDF export',
-                      'No ads',
-                      'Standard AI models',
+                    features: [
+                      l.premiumTierFeature1,
+                      l.premiumTierFeature2,
+                      l.premiumTierFeature3,
+                      l.premiumTierFeature4,
                     ],
                     colorScheme: colorScheme,
                     theme: theme,
@@ -130,13 +133,13 @@ class UpgradeScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _PlanCard(
                     tier: SubscriptionTier.pro,
-                    price: '\$19.99/mo',
+                    price: l.proTierPrice,
                     isCurrent: currentTier == SubscriptionTier.pro,
-                    features: const [
-                      'Unlimited analyses',
-                      'Unlimited PDF export',
-                      'Priority AI processing',
-                      'Future premium models',
+                    features: [
+                      l.proTierFeature1,
+                      l.proTierFeature2,
+                      l.proTierFeature3,
+                      l.proTierFeature4,
                     ],
                     colorScheme: colorScheme,
                     theme: theme,
@@ -196,7 +199,7 @@ class _RestoreButton extends StatelessWidget {
               : colorScheme.primary,
         ),
         label: Text(
-          'Restore Purchases',
+          context.l10n.upgradeRestore,
           style: theme.textTheme.bodySmall?.copyWith(
             color: isPurchasing
                 ? colorScheme.onSurfaceVariant.withValues(alpha: 0.4)
@@ -236,6 +239,8 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+
     final (Color accent, Color accentBg, IconData icon) = switch (tier) {
       SubscriptionTier.free => (
         colorScheme.secondary,
@@ -270,14 +275,14 @@ class _PlanCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: accentBg,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(icon, size: 22, color: accent),
+                  child: Icon(icon, size: 24, color: accent),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +314,7 @@ class _PlanCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      'BEST VALUE',
+                      l.upgradeBestValue,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: accent,
                         fontWeight: FontWeight.w800,
@@ -319,7 +324,7 @@ class _PlanCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ...features.map((f) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
@@ -367,7 +372,7 @@ class _PlanCard extends StatelessWidget {
                     ),
                   )),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: isCurrent
@@ -379,7 +384,7 @@ class _PlanCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text('Current Plan'),
+                      child: Text(l.upgradeCurrentPlan),
                     )
                   : FilledButton(
                       onPressed: isPurchasing ? null : onSelect,
@@ -398,8 +403,8 @@ class _PlanCard extends StatelessWidget {
                             )
                           : Text(
                               tier == SubscriptionTier.free
-                                  ? 'Downgrade'
-                                  : 'Subscribe',
+                                  ? l.upgradeDowngrade
+                                  : l.upgradeSubscribe,
                             ),
                     ),
             ),

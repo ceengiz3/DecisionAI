@@ -1,3 +1,5 @@
+import '../../../l10n/app_localizations.dart';
+
 enum DecisionType {
   personal,
   career,
@@ -29,6 +31,29 @@ enum DecisionType {
         return 'Relationship';
       case DecisionType.custom:
         return 'Custom';
+    }
+  }
+
+  String localizedDisplayName(AppLocalizations l10n) {
+    switch (this) {
+      case DecisionType.personal:
+        return l10n.decisionTypePersonal;
+      case DecisionType.career:
+        return l10n.decisionTypeCareer;
+      case DecisionType.business:
+        return l10n.decisionTypeBusiness;
+      case DecisionType.finance:
+        return l10n.decisionTypeFinance;
+      case DecisionType.health:
+        return l10n.decisionTypeHealth;
+      case DecisionType.education:
+        return l10n.decisionTypeEducation;
+      case DecisionType.travel:
+        return l10n.decisionTypeTravel;
+      case DecisionType.relationship:
+        return l10n.decisionTypeRelationship;
+      case DecisionType.custom:
+        return l10n.decisionTypeCustom;
     }
   }
 

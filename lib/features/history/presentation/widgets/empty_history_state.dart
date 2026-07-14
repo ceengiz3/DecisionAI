@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
+
 class EmptyHistoryState extends StatelessWidget {
   const EmptyHistoryState({super.key});
 
@@ -7,6 +9,7 @@ class EmptyHistoryState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
 
     return Center(
       child: Padding(
@@ -15,31 +18,31 @@ class EmptyHistoryState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.history_rounded,
-                size: 56,
+                size: 52,
                 color: colorScheme.primary.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             Text(
-              'No decisions yet',
+              l.historyNoDecisions,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Your analyzed decisions will appear here.\nStart by analyzing your first decision!',
+              l.historyNoDecisionsSubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                height: 1.4,
+                height: 1.5,
               ),
             ),
           ],

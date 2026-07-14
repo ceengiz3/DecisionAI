@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/database/models/decision_record.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../l10n/l10n.dart';
 import 'decision_card.dart';
 
 class RecentDecisionsSection extends ConsumerWidget {
@@ -23,7 +24,7 @@ class RecentDecisionsSection extends ConsumerWidget {
 
     return recordsAsync.when(
       data: (records) => _buildContent(context, theme, colorScheme, records),
-      loading: () => const SizedBox.shrink(),
+      loading: () => const SizedBox(height: 80, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
       error: (_, _) => const SizedBox.shrink(),
     );
   }
@@ -34,6 +35,8 @@ class RecentDecisionsSection extends ConsumerWidget {
     ColorScheme colorScheme,
     List<DecisionRecord> records,
   ) {
+    final l = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,7 +44,7 @@ class RecentDecisionsSection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Recent Decisions',
+              l.homeRecentDecisions,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -49,7 +52,7 @@ class RecentDecisionsSection extends ConsumerWidget {
             TextButton(
               onPressed: () => context.go(AppRoutes.history),
               child: Text(
-                'View All',
+                l.homeViewAll,
                 style: TextStyle(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -61,13 +64,23 @@ class RecentDecisionsSection extends ConsumerWidget {
         const SizedBox(height: 16),
         if (records.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(vertical: 32),
             child: Center(
-              child: Text(
-                'No decisions yet. Start a new analysis!',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.inbox_rounded,
+                    size: 40,
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l.homeNoDecisions,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
           )

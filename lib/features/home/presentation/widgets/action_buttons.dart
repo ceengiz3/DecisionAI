@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
+import '../../../../l10n/l10n.dart';
 
 class ActionButtons extends StatelessWidget {
   const ActionButtons({super.key});
@@ -10,6 +11,7 @@ class ActionButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -17,7 +19,7 @@ class ActionButtons extends StatelessWidget {
         FilledButton.icon(
           onPressed: () => context.go(AppRoutes.newDecision),
           icon: const Icon(Icons.add_circle_outline_rounded),
-          label: const Text('New Decision'),
+          label: Text(l.homeNewDecision),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 18),
             textStyle: theme.textTheme.titleMedium?.copyWith(
@@ -36,7 +38,7 @@ class ActionButtons extends StatelessWidget {
             color: colorScheme.primary,
           ),
           label: Text(
-            'Decision History',
+            l.homeDecisionHistory,
             style: TextStyle(color: colorScheme.primary),
           ),
           style: OutlinedButton.styleFrom(

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/domain/enums/decision_type.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../l10n/l10n.dart';
 import '../widgets/model_selector.dart';
 
 class NewDecisionScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 900),
     );
     _titleAnimation = CurvedAnimation(
       parent: _controller,
@@ -67,13 +68,13 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New Decision')),
+      appBar: AppBar(title: Text(l.newDecisionTitle)),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxWidth =
-              constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
+          final maxWidth = constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Center(
@@ -111,7 +112,7 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
                       animation: _buttonAnimation,
                       child: _buildAnalyzeButton(theme),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -123,18 +124,20 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
   }
 
   Widget _buildTitleField(ThemeData theme) {
+    final l = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Decision Title',
+          l.newDecisionLabel,
           style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Give your decision a name (optional)',
+          l.newDecisionHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
@@ -143,7 +146,7 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
         TextFormField(
           controller: _titleController,
           decoration: InputDecoration(
-            hintText: 'e.g. Investment Portfolio Strategy',
+            hintText: l.newDecisionHint,
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
@@ -163,18 +166,20 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
   }
 
   Widget _buildDescriptionField(ThemeData theme) {
+    final l = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Describe Your Decision',
+          l.newDecisionDescriptionLabel,
           style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Provide context, options, and any relevant details',
+          l.newDecisionCategoryHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
@@ -185,8 +190,7 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
           maxLines: 6,
           minLines: 4,
           decoration: InputDecoration(
-            hintText:
-                'I need to decide between investing in tech stocks vs bonds...',
+            hintText: l.newDecisionDescriptionHint,
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
@@ -210,14 +214,14 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Decision Category',
+          context.l10n.newDecisionCategoryLabel,
           style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Select the category that best fits your decision',
+          context.l10n.newDecisionCategoryHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
@@ -264,7 +268,7 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
         },
       ),
       icon: const Icon(Icons.auto_awesome_rounded),
-      label: const Text('Analyze Decision'),
+      label: Text(context.l10n.newDecisionAnalyze),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 18),
         textStyle: theme.textTheme.titleMedium?.copyWith(

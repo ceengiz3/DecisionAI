@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../domain/enums/subscription_tier.dart';
 import '../../domain/models/user_credits.dart';
 import '../providers/credits_provider.dart';
@@ -15,7 +16,7 @@ class UsageTrackerWidget extends ConsumerWidget {
 
     return creditsAsync.when(
       data: (credits) => tierAsync.when(
-        data: (tier) => _buildContent(context, ref, credits, tier),
+        data: (tier) => _buildContent(context, credits, tier),
         loading: () => _buildSkeleton(context),
         error: (_, _) => const SizedBox.shrink(),
       ),
@@ -26,7 +27,6 @@ class UsageTrackerWidget extends ConsumerWidget {
 
   Widget _buildContent(
     BuildContext context,
-    WidgetRef ref,
     UserCredits credits,
     SubscriptionTier tier,
   ) {
@@ -48,7 +48,7 @@ class UsageTrackerWidget extends ConsumerWidget {
             _Stat(
               icon: Icons.monetization_on_outlined,
               value: '${credits.credits}',
-              label: 'cr',
+              label: context.l10n.creditTrackerCredits,
               theme: theme,
               colorScheme: colorScheme,
             ),
@@ -64,7 +64,7 @@ class UsageTrackerWidget extends ConsumerWidget {
               value: credits.remainingMonthlyAnalyses == 0
                   ? '0'
                   : '${credits.remainingMonthlyAnalyses}',
-              label: 'mo',
+              label: context.l10n.creditTrackerMonthly,
               theme: theme,
               colorScheme: colorScheme,
             ),
@@ -129,24 +129,26 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+
     final (Color bg, Color fg, IconData icon, String label) = switch (tier) {
       SubscriptionTier.free => (
         colorScheme.secondaryContainer,
         colorScheme.onSecondaryContainer,
         Icons.person_outline_rounded,
-        'Free',
+        l.creditTrackerFree,
       ),
       SubscriptionTier.premium => (
         colorScheme.primaryContainer,
         colorScheme.onPrimaryContainer,
         Icons.star_rounded,
-        'Premium',
+        l.creditTrackerPremium,
       ),
       SubscriptionTier.pro => (
         colorScheme.tertiaryContainer,
         colorScheme.onTertiaryContainer,
         Icons.diamond_rounded,
-        'Pro',
+        l.creditTrackerPro,
       ),
     };
 

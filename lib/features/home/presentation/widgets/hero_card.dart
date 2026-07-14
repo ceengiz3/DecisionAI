@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
+
 class HeroCard extends StatelessWidget {
   const HeroCard({super.key});
 
@@ -7,10 +9,11 @@ class HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -28,7 +31,7 @@ class HeroCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withAlpha(50),
+              color: colorScheme.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
@@ -39,7 +42,7 @@ class HeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Make Smarter\nDecisions',
+            l.homeHeroTitle,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: colorScheme.onPrimaryContainer,
@@ -48,10 +51,10 @@ class HeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Leverage AI-powered analysis to evaluate options and make confident, data-driven choices.',
+            l.homeHeroSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onPrimaryContainer.withAlpha(180),
-              height: 1.4,
+              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+              height: 1.5,
             ),
           ),
           const SizedBox(height: 24),
@@ -60,13 +63,13 @@ class HeroCard extends StatelessWidget {
               Icon(
                 Icons.analytics_rounded,
                 size: 16,
-                color: colorScheme.onPrimaryContainer.withAlpha(150),
+                color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
               ),
               const SizedBox(width: 6),
               Text(
-                'Powered by advanced analysis',
+                l.homeHeroBadge,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onPrimaryContainer.withAlpha(150),
+                  color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w500,
                 ),
               ),

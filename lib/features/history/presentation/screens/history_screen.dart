@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/models/decision_record.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../l10n/l10n.dart';
 import '../providers/history_provider.dart';
 import '../widgets/decision_history_card.dart';
 import '../widgets/empty_history_state.dart';
@@ -18,9 +19,10 @@ class HistoryScreen extends ConsumerWidget {
     final historyAsync = ref.watch(historyProvider);
     final modelsAsync = ref.watch(availableModelsProvider);
     final notifier = ref.read(historyProvider.notifier);
+    final l = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Decision History')),
+      appBar: AppBar(title: Text(l.historyTitle)),
       body: historyAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -28,7 +30,7 @@ class HistoryScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: HistorySearchBar(
+              child: HistorySearchBar(
                 query: notifier.searchQuery,
                 onChanged: notifier.setSearchQuery,
               ),
@@ -51,7 +53,9 @@ class HistoryScreen extends ConsumerWidget {
               error: (_, _) => const SizedBox.shrink(),
             ),
             Expanded(
-              child: records.isEmpty ? const EmptyHistoryState() : _buildList(context, ref, records),
+              child: records.isEmpty
+                  ? const EmptyHistoryState()
+                  : _buildList(context, ref, records),
             ),
           ],
         ),
@@ -59,8 +63,10 @@ class HistoryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildList(BuildContext context, WidgetRef ref, List<DecisionRecord> records) {
+  Widget _buildList(
+      BuildContext context, WidgetRef ref, List<DecisionRecord> records) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l = context.l10n;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -84,18 +90,16 @@ class HistoryScreen extends ConsumerWidget {
             return await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Text('Delete Decision'),
-                content: const Text(
-                  'Are you sure you want to delete this decision? This action cannot be undone.',
-                ),
+                title: Text(l.historyDeleteTitle),
+                content: Text(l.historyDeleteMessage),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(l.historyCancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
-                    child: const Text('Delete'),
+                    child: Text(l.historyDelete),
                   ),
                 ],
               ),

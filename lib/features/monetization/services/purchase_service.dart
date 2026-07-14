@@ -19,10 +19,9 @@ class PurchaseService {
   List<ProductDetails> _products = [];
 
   PurchaseService({
-    required PurchaseVerifier verifier,
+    required this._verifier,
     InAppPurchase? inAppPurchase,
-  }) : _inAppPurchase = inAppPurchase ?? InAppPurchase.instance,
-       _verifier = verifier;
+  }) : _inAppPurchase = inAppPurchase ?? InAppPurchase.instance;
 
   PurchaseState get currentState => purchaseState.value;
 
@@ -113,7 +112,6 @@ class PurchaseService {
     if (defaultTargetPlatform == TargetPlatform.android) {
       return GooglePlayPurchaseParam(
         productDetails: product,
-        changeSubscriptionParam: null,
       );
     }
 

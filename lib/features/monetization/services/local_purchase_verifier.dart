@@ -31,7 +31,7 @@ class LocalPurchaseVerifier implements PurchaseVerifier {
     required String receiptData,
   }) async {
     if (receiptData.isEmpty) {
-      return VerificationResult(
+      return const VerificationResult(
         isValid: false,
         verifiedTier: SubscriptionTier.free,
       );

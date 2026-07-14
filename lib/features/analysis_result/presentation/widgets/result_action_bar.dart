@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../l10n/l10n.dart';
+
 class ResultActionBar extends StatelessWidget {
   final String analysisText;
   final VoidCallback? onExportPdf;
@@ -17,6 +19,7 @@ class ResultActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -27,7 +30,7 @@ class ResultActionBar extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () => _copyToClipboard(context),
                 icon: const Icon(Icons.content_copy_rounded, size: 20),
-                label: const Text('Copy'),
+                label: Text(l.analysisCopy),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: theme.textTheme.labelLarge?.copyWith(
@@ -45,7 +48,7 @@ class ResultActionBar extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: () => _share(context),
                 icon: const Icon(Icons.share_rounded, size: 20),
-                label: const Text('Share'),
+                label: Text(l.analysisShare),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: theme.textTheme.labelLarge?.copyWith(
@@ -70,7 +73,7 @@ class ResultActionBar extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.picture_as_pdf_rounded, size: 20),
-            label: Text(isExporting ? 'Exporting...' : 'Export PDF'),
+            label: Text(isExporting ? l.analysisExporting : l.analysisExportPdf),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               textStyle: theme.textTheme.labelLarge?.copyWith(
@@ -90,7 +93,7 @@ class ResultActionBar extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: analysisText));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Analysis copied to clipboard'),
+        content: Text(context.l10n.analysisCopied),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -101,7 +104,7 @@ class ResultActionBar extends StatelessWidget {
   void _share(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Share functionality coming soon'),
+        content: Text(context.l10n.analysisShareSoon),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
