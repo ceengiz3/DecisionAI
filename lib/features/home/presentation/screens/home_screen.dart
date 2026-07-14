@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
+import '../../../monetization/presentation/widgets/usage_tracker_widget.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/hero_card.dart';
 import '../widgets/recent_decisions_section.dart';
@@ -54,6 +55,13 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('DecisionAI'),
         actions: [
+          const UsageTrackerWidget(),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.workspace_premium_outlined),
+            tooltip: 'Upgrade Plan',
+            onPressed: () => context.go(AppRoutes.upgrade),
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Open Settings',

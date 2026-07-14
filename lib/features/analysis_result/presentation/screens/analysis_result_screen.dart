@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/isar_database.dart';
 import '../../../../core/database/models/decision_record.dart';
@@ -8,7 +9,9 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/domain/enums/ai_provider_type.dart';
 import '../../../../core/domain/enums/decision_type.dart';
 import '../../../../core/domain/models/analysis_result.dart';
+import '../../../../core/router/routes.dart';
 import '../../../../core/services/file_saver.dart';
+import '../../../monetization/presentation/providers/credits_provider.dart';
 import '../widgets/confidence_score_card.dart';
 import '../widgets/pros_cons_section.dart';
 import '../widgets/recommendation_card.dart';
@@ -87,6 +90,16 @@ class _AnalysisResultScreenState
 
   Future<void> _analyze() async {
     setState(() => _isLoading = true);
+
+    final creditsRepo = ref.read(creditsRepositoryProvider);
+    final canAnalyze = await creditsRepo.consumeCredit();
+    if (!canAnalyze) {
+      setState(() {
+        _error = 'You have no credits remaining. Watch a rewarded ad or upgrade your plan to continue.';
+        _isLoading = false;
+      });
+      return;
+    }
 
     try {
       final title = widget.title?.isNotEmpty == true
@@ -206,6 +219,24 @@ class _AnalysisResultScreenState
 
   Future<void> _exportPdf() async {
     if (_result == null) return;
+
+    final creditsRepo = ref.read(creditsRepositoryProvider);
+    final tier = await creditsRepo.getSubscriptionTier();
+    if (!tier.hasPdfExport) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('PDF export is available on Premium and Pro plans'),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Upgrade',
+            onPressed: () => context.go(AppRoutes.upgrade),
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isExporting = true);
 
     try {
@@ -354,43 +385,65 @@ class _AnalysisResultScreenState
   }
 
   Widget _buildErrorState(ThemeData theme, ColorScheme colorScheme) {
+    final isCreditError = _error?.contains('credits') == true;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 80),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.error_outline_rounded,
+            isCreditError ? Icons.monetization_on_outlined : Icons.error_outline_rounded,
             size: 48,
-            color: colorScheme.error,
+            color: isCreditError ? Colors.amber.shade600 : colorScheme.error,
           ),
           const SizedBox(height: 16),
           Text(
-            'Analysis Failed',
+            isCreditError ? 'Insufficient Credits' : 'Analysis Failed',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            _error!,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(height: 24),
-          FilledButton.tonalIcon(
-            onPressed: () {
-              setState(() {
-                _error = null;
-                _result = null;
-              });
-              _analyze();
-            },
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Retry'),
-          ),
+          if (isCreditError)
+            Column(
+              children: [
+                FilledButton.icon(
+                  onPressed: () => context.go(AppRoutes.upgrade),
+                  icon: const Icon(Icons.workspace_premium_outlined),
+                  label: const Text('Upgrade Plan'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          if (!isCreditError)
+            FilledButton.tonalIcon(
+              onPressed: () {
+                setState(() {
+                  _error = null;
+                  _result = null;
+                });
+                _analyze();
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Retry'),
+            ),
         ],
       ),
     );

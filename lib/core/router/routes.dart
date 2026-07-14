@@ -7,4 +7,5 @@ abstract final class AppRoutes {
   static const String analysisResult = '/analysis-result';
   static const String history = '/history';
   static const String settings = '/settings';
+  static const String upgrade = '/upgrade';
 }

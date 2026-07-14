@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/analysis_result/presentation/screens/analysis_result_screen.dart';
 import '../../features/history/presentation/screens/history_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/monetization/presentation/screens/upgrade_screen.dart';
 import '../../features/new_decision/presentation/screens/new_decision_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../database/models/decision_record.dart';
@@ -59,6 +60,11 @@ class AppRouter {
         path: AppRoutes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.upgrade,
+        name: 'upgrade',
+        builder: (context, state) => const UpgradeScreen(),
       ),
     ],
   );

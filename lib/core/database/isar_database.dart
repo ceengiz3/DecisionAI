@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'models/app_setting.dart';
 import 'models/decision_record.dart';
+import 'models/user_profile.dart';
 
 abstract final class IsarDatabase {
   IsarDatabase._();
@@ -13,7 +14,7 @@ abstract final class IsarDatabase {
     if (_instance != null) return _instance!;
     final dir = await getApplicationDocumentsDirectory();
     _instance = await Isar.open(
-      [AppSettingSchema, DecisionRecordSchema],
+      [AppSettingSchema, DecisionRecordSchema, UserProfileSchema],
       directory: dir.path,
     );
     return _instance!;
