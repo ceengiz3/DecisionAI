@@ -66,6 +66,7 @@ class _AnalysisResultScreenState
     final r = widget.existingRecord!;
     _result = AnalysisResult(
       decisionTitle: r.title ?? 'Untitled Decision',
+      description: r.description,
       confidenceScore: r.confidenceScore,
       recommendation: r.recommendation,
       pros: r.pros,
@@ -112,12 +113,26 @@ class _AnalysisResultScreenState
       }
 
       final service = ref.read(analysisServiceProvider);
-      final result = await service.analyze(
+      var result = await service.analyze(
         title: title,
         description: description,
         providerType: providerType,
         apiKey: apiKey,
         decisionType: decisionType,
+      );
+      result = AnalysisResult(
+        decisionTitle: result.decisionTitle,
+        description: description,
+        confidenceScore: result.confidenceScore,
+        recommendation: result.recommendation,
+        pros: result.pros,
+        cons: result.cons,
+        summary: result.summary,
+        usedModel: result.usedModel,
+        analyzedAt: result.analyzedAt,
+        risks: result.risks,
+        bestChoice: result.bestChoice,
+        reasoning: result.reasoning,
       );
 
       setState(() {
