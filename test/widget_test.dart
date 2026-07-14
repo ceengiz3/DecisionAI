@@ -1,16 +1,17 @@
-import 'package:decision_ai/main.dart';
+import 'package:decision_ai/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('App renders without error', (WidgetTester tester) async {
+  testWidgets('Home screen has Settings button in AppBar', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      const ProviderScope(
-        child: DecisionAIApp(),
-      ),
+      const MaterialApp(home: HomeScreen()),
     );
     await tester.pump();
-    expect(find.byType(MaterialApp), findsOneWidget);
+
+    expect(find.byIcon(Icons.settings), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
   });
 }
