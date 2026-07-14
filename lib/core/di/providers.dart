@@ -14,6 +14,7 @@ import '../router/app_router.dart';
 import '../services/analysis_service.dart';
 import '../services/api_key_storage.dart';
 import '../services/app_settings_service.dart';
+import '../services/pdf_service.dart';
 
 final dioClientProvider = Provider<DioClient>((ref) {
   return DioClient(baseUrl: AppConstants.baseUrl);
@@ -41,6 +42,10 @@ final analysisServiceProvider = Provider<AnalysisService>((ref) {
 
 final appSettingsServiceProvider = Provider<AppSettingsService>((ref) {
   return AppSettingsService();
+});
+
+final pdfServiceProvider = Provider<PdfService>((ref) {
+  return PdfService();
 });
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(

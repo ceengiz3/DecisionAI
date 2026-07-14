@@ -3,10 +3,14 @@ import 'package:flutter/services.dart';
 
 class ResultActionBar extends StatelessWidget {
   final String analysisText;
+  final VoidCallback? onExportPdf;
+  final bool isExporting;
 
   const ResultActionBar({
     super.key,
     required this.analysisText,
+    this.onExportPdf,
+    this.isExporting = false,
   });
 
   @override
@@ -14,31 +18,59 @@ class ResultActionBar extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () => _copyToClipboard(context),
-            icon: const Icon(Icons.content_copy_rounded, size: 20),
-            label: const Text('Copy'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              textStyle: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _copyToClipboard(context),
+                icon: const Icon(Icons.content_copy_rounded, size: 20),
+                label: const Text('Copy'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  side: BorderSide(color: colorScheme.outline),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              side: BorderSide(color: colorScheme.outline),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: () => _share(context),
+                icon: const Icon(Icons.share_rounded, size: 20),
+                label: const Text('Share'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: () => _share(context),
-            icon: const Icon(Icons.share_rounded, size: 20),
-            label: const Text('Share'),
+        if (onExportPdf != null) ...[
+          const SizedBox(height: 12),
+          FilledButton.tonalIcon(
+            onPressed: isExporting ? null : onExportPdf,
+            icon: isExporting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.picture_as_pdf_rounded, size: 20),
+            label: Text(isExporting ? 'Exporting...' : 'Export PDF'),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               textStyle: theme.textTheme.labelLarge?.copyWith(
@@ -49,7 +81,7 @@ class ResultActionBar extends StatelessWidget {
               ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }

@@ -8,6 +8,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/domain/enums/ai_provider_type.dart';
 import '../../../../core/domain/enums/decision_type.dart';
 import '../../../../core/domain/models/analysis_result.dart';
+import '../../../../core/services/file_saver.dart';
 import '../widgets/confidence_score_card.dart';
 import '../widgets/pros_cons_section.dart';
 import '../widgets/recommendation_card.dart';
@@ -47,6 +48,7 @@ class _AnalysisResultScreenState
   AnalysisResult? _result;
   String? _error;
   bool _isLoading = false;
+  bool _isExporting = false;
   bool _isExisting = false;
   late DateTime _analyzedAt;
 
@@ -200,6 +202,74 @@ class _AnalysisResultScreenState
     }
     await IsarDatabase.saveDecision(record);
     ref.invalidate(recentDecisionsProvider);
+  }
+
+  Future<void> _exportPdf() async {
+    if (_result == null) return;
+    setState(() => _isExporting = true);
+
+    try {
+      final record = widget.existingRecord ?? DecisionRecord()
+        ..title = widget.title?.isNotEmpty == true ? widget.title : null
+        ..description = widget.description ?? ''
+        ..model = _result!.usedModel
+        ..confidenceScore = _result!.confidenceScore
+        ..recommendation = _result!.recommendation
+        ..prosJson = jsonEncode(_result!.pros)
+        ..consJson = jsonEncode(_result!.cons)
+        ..summary = _result!.summary
+        ..createdAt = _analyzedAt
+        ..risksJson = jsonEncode(_result!.risks)
+        ..bestChoice = _result!.bestChoice
+        ..reasoning = _result!.reasoning;
+
+      final pdfService = ref.read(pdfServiceProvider);
+      final pdfBytes = await pdfService.generateAnalysisPdf(
+        result: _result!,
+        record: record,
+      );
+
+      final fileName =
+          'DecisionAI_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final saved = await saveBytesToFile(pdfBytes, fileName);
+
+      if (!mounted) return;
+
+      if (saved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF saved as $fileName'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not save PDF. Try a different browser.'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('PDF export failed: ${e.toString()}'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   @override
@@ -383,6 +453,8 @@ class _AnalysisResultScreenState
           animation: _actionAnimation!,
           child: ResultActionBar(
             analysisText: _buildAnalysisText(r),
+            onExportPdf: _exportPdf,
+            isExporting: _isExporting,
           ),
         ),
         const SizedBox(height: 12),
