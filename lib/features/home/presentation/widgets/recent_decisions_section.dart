@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../mock_data.dart';
+import '../../../../core/database/models/decision_record.dart';
+import '../../../../core/router/routes.dart';
+import '../providers/home_provider.dart';
 import 'decision_card.dart';
 
-class RecentDecisionsSection extends StatelessWidget {
+class RecentDecisionsSection extends ConsumerWidget {
   final Animation<double> parentAnimation;
 
   const RecentDecisionsSection({
@@ -12,10 +16,24 @@ class RecentDecisionsSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final recordsAsync = ref.watch(recentDecisionsProvider);
 
+    return recordsAsync.when(
+      data: (records) => _buildContent(context, theme, colorScheme, records),
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+    List<DecisionRecord> records,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,7 +47,7 @@ class RecentDecisionsSection extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () => context.go(AppRoutes.history),
               child: Text(
                 'View All',
                 style: TextStyle(
@@ -41,39 +59,52 @@ class RecentDecisionsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...List.generate(mockDecisions.length, (index) {
-          final cardIntervalStart = 0.3 + (index * 0.1);
-          final cardIntervalEnd = cardIntervalStart + 0.2;
-          final cardAnimation = Tween<double>(
-            begin: 0,
-            end: 1,
-          ).animate(
-            CurvedAnimation(
-              parent: parentAnimation,
-              curve: Interval(
-                cardIntervalStart,
-                cardIntervalEnd,
-                curve: Curves.easeOutCubic,
+        if (records.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                'No decisions yet. Start a new analysis!',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-          );
-          return AnimatedBuilder(
-            animation: cardAnimation,
-            builder: (context, child) {
-              return Opacity(
-                opacity: cardAnimation.value,
-                child: Transform.translate(
-                  offset: Offset(0, 20 * (1 - cardAnimation.value)),
-                  child: child,
+          )
+        else
+          ...List.generate(records.length, (index) {
+            final cardIntervalStart = 0.3 + (index * 0.1);
+            final cardIntervalEnd = cardIntervalStart + 0.2;
+            final cardAnimation = Tween<double>(
+              begin: 0,
+              end: 1,
+            ).animate(
+              CurvedAnimation(
+                parent: parentAnimation,
+                curve: Interval(
+                  cardIntervalStart,
+                  cardIntervalEnd,
+                  curve: Curves.easeOutCubic,
                 ),
-              );
-            },
-            child: DecisionCard(
-              decision: mockDecisions[index],
-              index: index,
-            ),
-          );
-        }),
+              ),
+            );
+            return AnimatedBuilder(
+              animation: cardAnimation,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: cardAnimation.value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - cardAnimation.value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: DecisionCard(
+                record: records[index],
+                index: index,
+              ),
+            );
+          }),
       ],
     );
   }

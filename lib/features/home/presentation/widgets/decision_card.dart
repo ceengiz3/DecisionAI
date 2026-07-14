@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../mock_data.dart';
+import '../../../../core/database/models/decision_record.dart';
+import '../../../../core/router/routes.dart';
 
 class DecisionCard extends StatelessWidget {
-  final Decision decision;
+  final DecisionRecord record;
   final int index;
 
   const DecisionCard({
     super.key,
-    required this.decision,
+    required this.record,
     required this.index,
   });
 
@@ -17,26 +19,15 @@ class DecisionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final statusColor = switch (decision.status) {
-      DecisionStatus.completed => const Color(0xFF2E7D32),
-      DecisionStatus.inProgress => const Color(0xFFE65100),
-      DecisionStatus.pending => colorScheme.onSurfaceVariant,
+    final confidencePercent = (record.confidenceScore * 100).round();
+    final confidenceColor = switch (confidencePercent) {
+      >= 80 => const Color(0xFF2E7D32),
+      >= 60 => const Color(0xFFE65100),
+      _ => colorScheme.onSurfaceVariant,
     };
 
-    final statusIcon = switch (decision.status) {
-      DecisionStatus.completed => Icons.check_circle_rounded,
-      DecisionStatus.inProgress => Icons.sync_rounded,
-      DecisionStatus.pending => Icons.schedule_rounded,
-    };
-
-    final statusLabel = switch (decision.status) {
-      DecisionStatus.completed => 'Completed',
-      DecisionStatus.inProgress => 'In Progress',
-      DecisionStatus.pending => 'Pending',
-    };
-
-    final month = decision.date.month.toString().padLeft(2, '0');
-    final day = decision.date.day.toString().padLeft(2, '0');
+    final month = record.createdAt.month.toString().padLeft(2, '0');
+    final day = record.createdAt.day.toString().padLeft(2, '0');
 
     return Card(
       elevation: 0,
@@ -47,7 +38,10 @@ class DecisionCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {},
+        onTap: () => context.go(
+          AppRoutes.analysisResult,
+          extra: {'record': record},
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -56,10 +50,14 @@ class DecisionCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: statusColor.withAlpha(25),
+                  color: colorScheme.primaryContainer.withAlpha(100),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(statusIcon, color: statusColor, size: 22),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: colorScheme.primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -67,14 +65,14 @@ class DecisionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      decision.title,
+                      record.title ?? 'Untitled Decision',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      decision.description,
+                      record.description,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -101,13 +99,13 @@ class DecisionCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withAlpha(25),
+                      color: confidenceColor.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      statusLabel,
+                      '$confidencePercent%',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: statusColor,
+                        color: confidenceColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
