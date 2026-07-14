@@ -82,9 +82,27 @@ enum SubscriptionTier {
 
   bool get isUnlimited => this == SubscriptionTier.pro;
 
+  String get productId {
+    switch (this) {
+      case SubscriptionTier.free:
+        return '';
+      case SubscriptionTier.premium:
+        return 'decision_ai_premium_monthly';
+      case SubscriptionTier.pro:
+        return 'decision_ai_pro_monthly';
+    }
+  }
+
   static SubscriptionTier fromString(String value) {
     return SubscriptionTier.values.firstWhere(
       (t) => t.name == value,
+      orElse: () => SubscriptionTier.free,
+    );
+  }
+
+  static SubscriptionTier fromProductId(String productId) {
+    return SubscriptionTier.values.firstWhere(
+      (t) => t.productId == productId,
       orElse: () => SubscriptionTier.free,
     );
   }

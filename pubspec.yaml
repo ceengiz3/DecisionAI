@@ -46,6 +46,10 @@ dependencies:
   path_provider: ^2.1.6
   flutter_secure_storage: ^9.2.4
   pdf: ^3.13.0
+  google_mobile_ads: ^9.0.0
+  in_app_purchase: ^3.3.0
+  in_app_purchase_android: ^0.5.1
+  in_app_purchase_storekit: ^0.4.10+1
 
 dev_dependencies:
   flutter_test:

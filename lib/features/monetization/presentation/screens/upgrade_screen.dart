@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/enums/subscription_tier.dart';
+import '../../services/purchase_service.dart';
 import '../providers/credits_provider.dart';
 
 class UpgradeScreen extends ConsumerWidget {
@@ -18,9 +19,13 @@ class UpgradeScreen extends ConsumerWidget {
         title: const Text('Upgrade Plan'),
       ),
       body: currentTierAsync.when(
-        data: (currentTier) => _buildContent(context, ref, theme, colorScheme, currentTier),
+        data: (currentTier) => _buildContent(
+          context, ref, theme, colorScheme, currentTier,
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _buildContent(context, ref, theme, colorScheme, SubscriptionTier.free),
+        error: (_, _) => _buildContent(
+          context, ref, theme, colorScheme, SubscriptionTier.free,
+        ),
       ),
     );
   }
@@ -32,6 +37,10 @@ class UpgradeScreen extends ConsumerWidget {
     ColorScheme colorScheme,
     SubscriptionTier currentTier,
   ) {
+    final purchaseService = ref.watch(purchaseServiceProvider);
+    final purchaseState = purchaseService.purchaseState.value;
+    final isPurchasing = purchaseState.isPurchasing;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
@@ -57,6 +66,30 @@ class UpgradeScreen extends ConsumerWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  if (purchaseState.error != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, size: 18, color: colorScheme.onErrorContainer),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              purchaseState.error!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   _PlanCard(
                     tier: SubscriptionTier.free,
@@ -74,6 +107,7 @@ class UpgradeScreen extends ConsumerWidget {
                     colorScheme: colorScheme,
                     theme: theme,
                     onSelect: () {},
+                    isPurchasing: isPurchasing,
                   ),
                   const SizedBox(height: 16),
                   _PlanCard(
@@ -90,7 +124,8 @@ class UpgradeScreen extends ConsumerWidget {
                     theme: theme,
                     onSelect: currentTier == SubscriptionTier.premium
                         ? null
-                        : () => _selectPlan(ref, SubscriptionTier.premium),
+                        : () => _purchase(ref, SubscriptionTier.premium),
+                    isPurchasing: isPurchasing,
                   ),
                   const SizedBox(height: 16),
                   _PlanCard(
@@ -108,7 +143,15 @@ class UpgradeScreen extends ConsumerWidget {
                     isPro: true,
                     onSelect: currentTier == SubscriptionTier.pro
                         ? null
-                        : () => _selectPlan(ref, SubscriptionTier.pro),
+                        : () => _purchase(ref, SubscriptionTier.pro),
+                    isPurchasing: isPurchasing,
+                  ),
+                  const SizedBox(height: 20),
+                  _RestoreButton(
+                    purchaseService: purchaseService,
+                    isPurchasing: isPurchasing,
+                    theme: theme,
+                    colorScheme: colorScheme,
                   ),
                 ],
               ),
@@ -119,11 +162,50 @@ class UpgradeScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _selectPlan(WidgetRef ref, SubscriptionTier tier) async {
-    final repo = ref.read(creditsRepositoryProvider);
-    await repo.setSubscriptionTier(tier);
-    ref.invalidate(subscriptionTierProvider);
-    ref.invalidate(userCreditsProvider);
+  Future<void> _purchase(WidgetRef ref, SubscriptionTier tier) async {
+    final service = ref.read(purchaseServiceProvider);
+    await service.purchaseSubscription(tier);
+  }
+}
+
+class _RestoreButton extends StatelessWidget {
+  final PurchaseService purchaseService;
+  final bool isPurchasing;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  const _RestoreButton({
+    required this.purchaseService,
+    required this.isPurchasing,
+    required this.theme,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: TextButton.icon(
+        onPressed: isPurchasing
+            ? null
+            : () => purchaseService.restorePurchases(),
+        icon: Icon(
+          Icons.restore_rounded,
+          size: 18,
+          color: isPurchasing
+              ? colorScheme.onSurfaceVariant.withValues(alpha: 0.4)
+              : colorScheme.primary,
+        ),
+        label: Text(
+          'Restore Purchases',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: isPurchasing
+                ? colorScheme.onSurfaceVariant.withValues(alpha: 0.4)
+                : colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -137,6 +219,7 @@ class _PlanCard extends StatelessWidget {
   final ThemeData theme;
   final VoidCallback? onSelect;
   final bool isPro;
+  final bool isPurchasing;
 
   const _PlanCard({
     required this.tier,
@@ -148,6 +231,7 @@ class _PlanCard extends StatelessWidget {
     required this.theme,
     this.onSelect,
     this.isPro = false,
+    this.isPurchasing = false,
   });
 
   @override
@@ -298,7 +382,7 @@ class _PlanCard extends StatelessWidget {
                       child: const Text('Current Plan'),
                     )
                   : FilledButton(
-                      onPressed: onSelect,
+                      onPressed: isPurchasing ? null : onSelect,
                       style: FilledButton.styleFrom(
                         backgroundColor: accent,
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -306,11 +390,17 @@ class _PlanCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: Text(
-                        tier == SubscriptionTier.free
-                            ? 'Downgrade'
-                            : 'Subscribe',
-                      ),
+                      child: isPurchasing
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              tier == SubscriptionTier.free
+                                  ? 'Downgrade'
+                                  : 'Subscribe',
+                            ),
                     ),
             ),
           ],
