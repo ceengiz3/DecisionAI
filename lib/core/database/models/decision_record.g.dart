@@ -13,62 +13,82 @@ extension GetDecisionRecordCollection on Isar {
   IsarCollection<DecisionRecord> get decisionRecords => this.collection();
 }
 
-final DecisionRecordSchema = CollectionSchema(
+const DecisionRecordSchema = CollectionSchema(
   name: r'DecisionRecord',
-  id: int.parse('3623363144586890648'),
+  id: 3623363,
   properties: {
-    r'confidenceScore': PropertySchema(
+    r'bestChoice': PropertySchema(
       id: 0,
+      name: r'bestChoice',
+      type: IsarType.string,
+    ),
+    r'confidenceScore': PropertySchema(
+      id: 1,
       name: r'confidenceScore',
       type: IsarType.double,
     ),
     r'cons': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'cons',
       type: IsarType.stringList,
     ),
     r'consJson': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'consJson',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'description': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'description',
       type: IsarType.string,
     ),
     r'model': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'model',
       type: IsarType.string,
     ),
     r'pros': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'pros',
       type: IsarType.stringList,
     ),
     r'prosJson': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'prosJson',
       type: IsarType.string,
     ),
+    r'reasoning': PropertySchema(
+      id: 9,
+      name: r'reasoning',
+      type: IsarType.string,
+    ),
     r'recommendation': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'recommendation',
       type: IsarType.string,
     ),
+    r'risks': PropertySchema(
+      id: 11,
+      name: r'risks',
+      type: IsarType.stringList,
+    ),
+    r'risksJson': PropertySchema(
+      id: 12,
+      name: r'risksJson',
+      type: IsarType.string,
+    ),
     r'summary': PropertySchema(
-      id: 9,
+      id: 13,
       name: r'summary',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 10,
+      id: 14,
       name: r'title',
       type: IsarType.string,
     )
@@ -93,6 +113,12 @@ int _decisionRecordEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.bestChoice;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.cons.length * 3;
   {
     for (var i = 0; i < object.cons.length; i++) {
@@ -111,7 +137,21 @@ int _decisionRecordEstimateSize(
     }
   }
   bytesCount += 3 + object.prosJson.length * 3;
+  {
+    final value = object.reasoning;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.recommendation.length * 3;
+  bytesCount += 3 + object.risks.length * 3;
+  {
+    for (var i = 0; i < object.risks.length; i++) {
+      final value = object.risks[i];
+      bytesCount += value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.risksJson.length * 3;
   bytesCount += 3 + object.summary.length * 3;
   {
     final value = object.title;
@@ -128,17 +168,21 @@ void _decisionRecordSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDouble(offsets[0], object.confidenceScore);
-  writer.writeStringList(offsets[1], object.cons);
-  writer.writeString(offsets[2], object.consJson);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeString(offsets[4], object.description);
-  writer.writeString(offsets[5], object.model);
-  writer.writeStringList(offsets[6], object.pros);
-  writer.writeString(offsets[7], object.prosJson);
-  writer.writeString(offsets[8], object.recommendation);
-  writer.writeString(offsets[9], object.summary);
-  writer.writeString(offsets[10], object.title);
+  writer.writeString(offsets[0], object.bestChoice);
+  writer.writeDouble(offsets[1], object.confidenceScore);
+  writer.writeStringList(offsets[2], object.cons);
+  writer.writeString(offsets[3], object.consJson);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeString(offsets[5], object.description);
+  writer.writeString(offsets[6], object.model);
+  writer.writeStringList(offsets[7], object.pros);
+  writer.writeString(offsets[8], object.prosJson);
+  writer.writeString(offsets[9], object.reasoning);
+  writer.writeString(offsets[10], object.recommendation);
+  writer.writeStringList(offsets[11], object.risks);
+  writer.writeString(offsets[12], object.risksJson);
+  writer.writeString(offsets[13], object.summary);
+  writer.writeString(offsets[14], object.title);
 }
 
 DecisionRecord _decisionRecordDeserialize(
@@ -148,16 +192,19 @@ DecisionRecord _decisionRecordDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = DecisionRecord();
-  object.confidenceScore = reader.readDouble(offsets[0]);
-  object.consJson = reader.readString(offsets[2]);
-  object.createdAt = reader.readDateTime(offsets[3]);
-  object.description = reader.readString(offsets[4]);
+  object.bestChoice = reader.readStringOrNull(offsets[0]);
+  object.confidenceScore = reader.readDouble(offsets[1]);
+  object.consJson = reader.readString(offsets[3]);
+  object.createdAt = reader.readDateTime(offsets[4]);
+  object.description = reader.readString(offsets[5]);
   object.id = id;
-  object.model = reader.readString(offsets[5]);
-  object.prosJson = reader.readString(offsets[7]);
-  object.recommendation = reader.readString(offsets[8]);
-  object.summary = reader.readString(offsets[9]);
-  object.title = reader.readStringOrNull(offsets[10]);
+  object.model = reader.readString(offsets[6]);
+  object.prosJson = reader.readString(offsets[8]);
+  object.reasoning = reader.readStringOrNull(offsets[9]);
+  object.recommendation = reader.readString(offsets[10]);
+  object.risksJson = reader.readString(offsets[12]);
+  object.summary = reader.readString(offsets[13]);
+  object.title = reader.readStringOrNull(offsets[14]);
   return object;
 }
 
@@ -169,26 +216,34 @@ P _decisionRecordDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readDouble(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
-    case 4:
       return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readDateTime(offset)) as P;
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 7:
       return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readStringList(offset) ?? []) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
+      return (reader.readString(offset)) as P;
+    case 14:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -291,6 +346,160 @@ extension DecisionRecordQueryWhere
 
 extension DecisionRecordQueryFilter
     on QueryBuilder<DecisionRecord, DecisionRecord, QFilterCondition> {
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'bestChoice',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'bestChoice',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bestChoice',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'bestChoice',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'bestChoice',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'bestChoice',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'bestChoice',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'bestChoice',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'bestChoice',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'bestChoice',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bestChoice',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      bestChoiceIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'bestChoice',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
       confidenceScoreEqualTo(
     double value, {
@@ -1463,6 +1672,160 @@ extension DecisionRecordQueryFilter
   }
 
   QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'reasoning',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'reasoning',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'reasoning',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'reasoning',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'reasoning',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'reasoning',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'reasoning',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'reasoning',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'reasoning',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'reasoning',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'reasoning',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      reasoningIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'reasoning',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
       recommendationEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1593,6 +1956,367 @@ extension DecisionRecordQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'recommendation',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'risks',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'risks',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'risks',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'risks',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'risks',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'risks',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'risks',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'risks',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'risks',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'risks',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'risks',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'risks',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'risks',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'risks',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'risks',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'risks',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'risksJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'risksJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'risksJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'risksJson',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'risksJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'risksJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'risksJson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'risksJson',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'risksJson',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterFilterCondition>
+      risksJsonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'risksJson',
         value: '',
       ));
     });
@@ -1898,6 +2622,20 @@ extension DecisionRecordQueryLinks
 extension DecisionRecordQuerySortBy
     on QueryBuilder<DecisionRecord, DecisionRecord, QSortBy> {
   QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      sortByBestChoice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bestChoice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      sortByBestChoiceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bestChoice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
       sortByConfidenceScore() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'confidenceScore', Sort.asc);
@@ -1976,6 +2714,19 @@ extension DecisionRecordQuerySortBy
     });
   }
 
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy> sortByReasoning() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reasoning', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      sortByReasoningDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reasoning', Sort.desc);
+    });
+  }
+
   QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
       sortByRecommendation() {
     return QueryBuilder.apply(this, (query) {
@@ -1987,6 +2738,19 @@ extension DecisionRecordQuerySortBy
       sortByRecommendationDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recommendation', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy> sortByRisksJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'risksJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      sortByRisksJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'risksJson', Sort.desc);
     });
   }
 
@@ -2018,6 +2782,20 @@ extension DecisionRecordQuerySortBy
 
 extension DecisionRecordQuerySortThenBy
     on QueryBuilder<DecisionRecord, DecisionRecord, QSortThenBy> {
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      thenByBestChoice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bestChoice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      thenByBestChoiceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bestChoice', Sort.desc);
+    });
+  }
+
   QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
       thenByConfidenceScore() {
     return QueryBuilder.apply(this, (query) {
@@ -2109,6 +2887,19 @@ extension DecisionRecordQuerySortThenBy
     });
   }
 
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy> thenByReasoning() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reasoning', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      thenByReasoningDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reasoning', Sort.desc);
+    });
+  }
+
   QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
       thenByRecommendation() {
     return QueryBuilder.apply(this, (query) {
@@ -2120,6 +2911,19 @@ extension DecisionRecordQuerySortThenBy
       thenByRecommendationDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recommendation', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy> thenByRisksJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'risksJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QAfterSortBy>
+      thenByRisksJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'risksJson', Sort.desc);
     });
   }
 
@@ -2151,6 +2955,13 @@ extension DecisionRecordQuerySortThenBy
 
 extension DecisionRecordQueryWhereDistinct
     on QueryBuilder<DecisionRecord, DecisionRecord, QDistinct> {
+  QueryBuilder<DecisionRecord, DecisionRecord, QDistinct> distinctByBestChoice(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'bestChoice', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<DecisionRecord, DecisionRecord, QDistinct>
       distinctByConfidenceScore() {
     return QueryBuilder.apply(this, (query) {
@@ -2205,11 +3016,31 @@ extension DecisionRecordQueryWhereDistinct
     });
   }
 
+  QueryBuilder<DecisionRecord, DecisionRecord, QDistinct> distinctByReasoning(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'reasoning', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<DecisionRecord, DecisionRecord, QDistinct>
       distinctByRecommendation({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'recommendation',
           caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QDistinct> distinctByRisks() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'risks');
+    });
+  }
+
+  QueryBuilder<DecisionRecord, DecisionRecord, QDistinct> distinctByRisksJson(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'risksJson', caseSensitive: caseSensitive);
     });
   }
 
@@ -2233,6 +3064,12 @@ extension DecisionRecordQueryProperty
   QueryBuilder<DecisionRecord, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<DecisionRecord, String?, QQueryOperations> bestChoiceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'bestChoice');
     });
   }
 
@@ -2285,10 +3122,28 @@ extension DecisionRecordQueryProperty
     });
   }
 
+  QueryBuilder<DecisionRecord, String?, QQueryOperations> reasoningProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'reasoning');
+    });
+  }
+
   QueryBuilder<DecisionRecord, String, QQueryOperations>
       recommendationProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'recommendation');
+    });
+  }
+
+  QueryBuilder<DecisionRecord, List<String>, QQueryOperations> risksProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'risks');
+    });
+  }
+
+  QueryBuilder<DecisionRecord, String, QQueryOperations> risksJsonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'risksJson');
     });
   }
 

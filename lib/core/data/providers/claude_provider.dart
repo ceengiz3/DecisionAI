@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 
+import '../../domain/enums/decision_type.dart';
 import '../../domain/interfaces/ai_provider.dart';
 import '../../domain/models/analysis_result.dart';
+import '../../services/prompt_builder.dart';
 
 class ClaudeProvider extends AiProvider {
   final Dio _dio;
@@ -28,20 +30,22 @@ class ClaudeProvider extends AiProvider {
   Future<AnalysisResult> analyze({
     required String title,
     required String description,
+    DecisionType decisionType = DecisionType.custom,
   }) async {
     final response = await _dio.post(
       '/messages',
       data: {
         'model': 'claude-3-5-sonnet-20241022',
-        'max_tokens': 1500,
+        'max_tokens': 2000,
         'temperature': 0.7,
-        'system':
-            'You are a decision analysis assistant. Always respond with valid JSON only. No markdown, no code fences.',
+        'system': PromptBuilder.buildSystemPrompt(decisionType),
         'messages': [
           {
             'role': 'user',
-            'content':
-                'Analyze this decision and return JSON with keys: recommendation (string), pros (array of strings), cons (array of strings), summary (string), confidenceScore (number 0-1).\n\nDecision: $title\nContext: $description',
+            'content': PromptBuilder.buildUserPrompt(
+              title: title,
+              description: description,
+            ),
           },
         ],
       },
@@ -56,13 +60,16 @@ class ClaudeProvider extends AiProvider {
 
     return AnalysisResult(
       decisionTitle: title,
-      confidenceScore: (parsed['confidenceScore'] as num).toDouble(),
+      confidenceScore: (parsed['confidence'] as num).toDouble(),
       recommendation: parsed['recommendation'] as String,
       pros: List<String>.from(parsed['pros'] as List),
       cons: List<String>.from(parsed['cons'] as List),
       summary: parsed['summary'] as String,
       usedModel: displayName,
       analyzedAt: DateTime.now(),
+      risks: List<String>.from(parsed['risks'] as List? ?? []),
+      bestChoice: parsed['best_choice'] as String?,
+      reasoning: parsed['reasoning'] as String?,
     );
   }
 }

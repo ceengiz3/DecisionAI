@@ -13,9 +13,9 @@ extension GetAppSettingCollection on Isar {
   IsarCollection<AppSetting> get appSettings => this.collection();
 }
 
-final AppSettingSchema = CollectionSchema(
+const AppSettingSchema = CollectionSchema(
   name: r'AppSetting',
-  id: int.parse('-948817443998796339'),
+  id: -9488174,
   properties: {
     r'key': PropertySchema(
       id: 0,

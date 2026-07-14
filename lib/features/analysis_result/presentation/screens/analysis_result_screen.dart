@@ -6,6 +6,7 @@ import '../../../../core/database/isar_database.dart';
 import '../../../../core/database/models/decision_record.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/domain/enums/ai_provider_type.dart';
+import '../../../../core/domain/enums/decision_type.dart';
 import '../../../../core/domain/models/analysis_result.dart';
 import '../widgets/confidence_score_card.dart';
 import '../widgets/pros_cons_section.dart';
@@ -17,6 +18,7 @@ class AnalysisResultScreen extends ConsumerStatefulWidget {
   final String? description;
   final String? model;
   final DecisionRecord? existingRecord;
+  final String? decisionType;
 
   const AnalysisResultScreen({
     super.key,
@@ -24,6 +26,7 @@ class AnalysisResultScreen extends ConsumerStatefulWidget {
     this.description,
     this.model,
     this.existingRecord,
+    this.decisionType,
   });
 
   @override
@@ -38,6 +41,7 @@ class _AnalysisResultScreenState
   Animation<double>? _confidenceAnimation;
   Animation<double>? _recommendationAnimation;
   Animation<double>? _prosConsAnimation;
+  Animation<double>? _risksAnimation;
   Animation<double>? _actionAnimation;
 
   AnalysisResult? _result;
@@ -69,6 +73,9 @@ class _AnalysisResultScreenState
       summary: r.summary,
       usedModel: r.model,
       analyzedAt: r.createdAt,
+      risks: r.risks,
+      bestChoice: r.bestChoice,
+      reasoning: r.reasoning,
     );
     _isExisting = true;
     _analyzedAt = r.createdAt;
@@ -85,6 +92,11 @@ class _AnalysisResultScreenState
       final description = widget.description ?? '';
       final modelName = widget.model ?? 'GPT-4o';
       final providerType = AiProviderType.fromDisplayName(modelName);
+      final decisionTypeName = widget.decisionType ?? 'custom';
+      final decisionType = DecisionType.values.firstWhere(
+        (t) => t.name == decisionTypeName,
+        orElse: () => DecisionType.custom,
+      );
 
       final storage = ref.read(apiKeyStorageProvider);
       final apiKey = await storage.getApiKey(providerType);
@@ -105,6 +117,7 @@ class _AnalysisResultScreenState
         description: description,
         providerType: providerType,
         apiKey: apiKey,
+        decisionType: decisionType,
       );
 
       setState(() {
@@ -125,23 +138,27 @@ class _AnalysisResultScreenState
   void _initAnimations() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1400),
     );
     _confidenceAnimation = CurvedAnimation(
       parent: _controller!,
-      curve: const Interval(0.0, 0.35, curve: Curves.easeOutCubic),
+      curve: const Interval(0.0, 0.3, curve: Curves.easeOutCubic),
     );
     _recommendationAnimation = CurvedAnimation(
       parent: _controller!,
-      curve: const Interval(0.15, 0.5, curve: Curves.easeOutCubic),
+      curve: const Interval(0.12, 0.42, curve: Curves.easeOutCubic),
     );
     _prosConsAnimation = CurvedAnimation(
       parent: _controller!,
-      curve: const Interval(0.3, 0.65, curve: Curves.easeOutCubic),
+      curve: const Interval(0.25, 0.55, curve: Curves.easeOutCubic),
+    );
+    _risksAnimation = CurvedAnimation(
+      parent: _controller!,
+      curve: const Interval(0.38, 0.68, curve: Curves.easeOutCubic),
     );
     _actionAnimation = CurvedAnimation(
       parent: _controller!,
-      curve: const Interval(0.5, 0.8, curve: Curves.easeOutCubic),
+      curve: const Interval(0.52, 0.82, curve: Curves.easeOutCubic),
     );
     _controller!.forward();
   }
@@ -157,6 +174,15 @@ class _AnalysisResultScreenState
       ..consJson = jsonEncode(result.cons)
       ..summary = result.summary
       ..createdAt = _analyzedAt;
+    if (result.risks.isNotEmpty) {
+      record.risksJson = jsonEncode(result.risks);
+    }
+    if (result.bestChoice != null) {
+      record.bestChoice = result.bestChoice;
+    }
+    if (result.reasoning != null) {
+      record.reasoning = result.reasoning;
+    }
     await IsarDatabase.saveDecision(record);
   }
 
@@ -306,6 +332,13 @@ class _AnalysisResultScreenState
             animation: _recommendationAnimation!,
           ),
         ),
+        if (r.bestChoice != null && r.bestChoice!.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _AnimatedSection(
+            animation: _recommendationAnimation!,
+            child: _BestChoiceCard(bestChoice: r.bestChoice!),
+          ),
+        ],
         const SizedBox(height: 20),
         _AnimatedSection(
           animation: _prosConsAnimation!,
@@ -315,6 +348,20 @@ class _AnalysisResultScreenState
             animation: _prosConsAnimation!,
           ),
         ),
+        if (r.risks.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _AnimatedSection(
+            animation: _risksAnimation!,
+            child: _RisksSection(risks: r.risks),
+          ),
+        ],
+        if (r.reasoning != null && r.reasoning!.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _AnimatedSection(
+            animation: _risksAnimation!,
+            child: _ReasoningCard(reasoning: r.reasoning!),
+          ),
+        ],
         const SizedBox(height: 24),
         _AnimatedSection(
           animation: _actionAnimation!,
@@ -407,6 +454,10 @@ class _AnalysisResultScreenState
     buffer.writeln();
     buffer.writeln('Recommendation:');
     buffer.writeln(r.recommendation);
+    if (r.bestChoice != null && r.bestChoice!.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('Best Choice: ${r.bestChoice}');
+    }
     buffer.writeln();
     buffer.writeln('Pros:');
     for (final pro in r.pros) {
@@ -417,9 +468,206 @@ class _AnalysisResultScreenState
     for (final con in r.cons) {
       buffer.writeln('- $con');
     }
+    if (r.risks.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('Risks:');
+      for (final risk in r.risks) {
+        buffer.writeln('- $risk');
+      }
+    }
     buffer.writeln();
     buffer.writeln(r.summary);
+    if (r.reasoning != null && r.reasoning!.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('Reasoning:');
+      buffer.writeln(r.reasoning);
+    }
     return buffer.toString();
+  }
+}
+
+class _BestChoiceCard extends StatelessWidget {
+  final String bestChoice;
+
+  const _BestChoiceCard({required this.bestChoice});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: colorScheme.tertiaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.onTertiaryContainer.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.flag_rounded,
+                color: colorScheme.onTertiaryContainer,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Best Choice',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onTertiaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    bestChoice,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onTertiaryContainer
+                          .withValues(alpha: 0.85),
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RisksSection extends StatelessWidget {
+  final List<String> risks;
+
+  const _RisksSection({required this.risks});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20,
+                  color: Color(0xFFE65100),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Risks to Consider',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            ...List.generate(risks.length, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE65100).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.priority_high_rounded,
+                        size: 14,
+                        color: Color(0xFFE65100),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        risks[index],
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReasoningCard extends StatelessWidget {
+  final String reasoning;
+
+  const _ReasoningCard({required this.reasoning});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.psychology_rounded,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Analysis Reasoning',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              reasoning,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

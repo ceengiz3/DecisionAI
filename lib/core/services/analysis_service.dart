@@ -3,6 +3,7 @@ import '../data/providers/deepseek_provider.dart';
 import '../data/providers/gemini_provider.dart';
 import '../data/providers/openai_provider.dart';
 import '../domain/enums/ai_provider_type.dart';
+import '../domain/enums/decision_type.dart';
 import '../domain/interfaces/ai_provider.dart';
 import '../domain/models/analysis_result.dart';
 
@@ -25,8 +26,13 @@ class AnalysisService {
     required String description,
     required AiProviderType providerType,
     required String apiKey,
+    DecisionType decisionType = DecisionType.custom,
   }) async {
     final provider = _createProvider(providerType, apiKey);
-    return provider.analyze(title: title, description: description);
+    return provider.analyze(
+      title: title,
+      description: description,
+      decisionType: decisionType,
+    );
   }
 }

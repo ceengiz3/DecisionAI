@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 
+import '../../domain/enums/decision_type.dart';
 import '../../domain/interfaces/ai_provider.dart';
 import '../../domain/models/analysis_result.dart';
+import '../../services/prompt_builder.dart';
 
 class DeepSeekProvider extends AiProvider {
   final Dio _dio;
@@ -27,6 +29,7 @@ class DeepSeekProvider extends AiProvider {
   Future<AnalysisResult> analyze({
     required String title,
     required String description,
+    DecisionType decisionType = DecisionType.custom,
   }) async {
     final response = await _dio.post(
       '/chat/completions',
@@ -35,17 +38,19 @@ class DeepSeekProvider extends AiProvider {
         'messages': [
           {
             'role': 'system',
-            'content':
-                'You are a decision analysis assistant. Analyze the decision and return valid JSON with keys: recommendation (string), pros (array of strings), cons (array of strings), summary (string), confidenceScore (number 0-1).',
+            'content': PromptBuilder.buildSystemPrompt(decisionType),
           },
           {
             'role': 'user',
-            'content': 'Decision: $title\nContext: $description',
+            'content': PromptBuilder.buildUserPrompt(
+              title: title,
+              description: description,
+            ),
           },
         ],
         'response_format': {'type': 'json_object'},
         'temperature': 0.7,
-        'max_tokens': 1500,
+        'max_tokens': 2000,
       },
     );
 
@@ -58,13 +63,16 @@ class DeepSeekProvider extends AiProvider {
 
     return AnalysisResult(
       decisionTitle: title,
-      confidenceScore: (parsed['confidenceScore'] as num).toDouble(),
+      confidenceScore: (parsed['confidence'] as num).toDouble(),
       recommendation: parsed['recommendation'] as String,
       pros: List<String>.from(parsed['pros'] as List),
       cons: List<String>.from(parsed['cons'] as List),
       summary: parsed['summary'] as String,
       usedModel: displayName,
       analyzedAt: DateTime.now(),
+      risks: List<String>.from(parsed['risks'] as List? ?? []),
+      bestChoice: parsed['best_choice'] as String?,
+      reasoning: parsed['reasoning'] as String?,
     );
   }
 }

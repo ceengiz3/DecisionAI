@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/domain/enums/decision_type.dart';
 import '../../../../core/router/routes.dart';
 import '../widgets/model_selector.dart';
 
@@ -17,34 +18,40 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
   late final Animation<double> _titleAnimation;
   late final Animation<double> _descriptionAnimation;
   late final Animation<double> _modelAnimation;
+  late final Animation<double> _categoryAnimation;
   late final Animation<double> _buttonAnimation;
 
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   String _selectedModel = 'GPT-4o';
+  DecisionType _selectedType = DecisionType.custom;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1100),
     );
     _titleAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 0.3, curve: Curves.easeOutCubic),
+      curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic),
     );
     _descriptionAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.15, 0.45, curve: Curves.easeOutCubic),
+      curve: const Interval(0.12, 0.38, curve: Curves.easeOutCubic),
+    );
+    _categoryAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.25, 0.52, curve: Curves.easeOutCubic),
     );
     _modelAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.3, 0.6, curve: Curves.easeOutCubic),
+      curve: const Interval(0.38, 0.65, curve: Curves.easeOutCubic),
     );
     _buttonAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.45, 0.75, curve: Curves.easeOutCubic),
+      curve: const Interval(0.52, 0.78, curve: Curves.easeOutCubic),
     );
     _controller.forward();
   }
@@ -83,6 +90,11 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
                     _AnimatedFormField(
                       animation: _descriptionAnimation,
                       child: _buildDescriptionField(theme),
+                    ),
+                    const SizedBox(height: 20),
+                    _AnimatedFormField(
+                      animation: _categoryAnimation,
+                      child: _buildTypeSelector(theme),
                     ),
                     const SizedBox(height: 20),
                     _AnimatedFormField(
@@ -191,6 +203,55 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
     );
   }
 
+  Widget _buildTypeSelector(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Decision Category',
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Select the category that best fits your decision',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<DecisionType>(
+              value: _selectedType,
+              isExpanded: true,
+              items: DecisionType.values.map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Text(type.displayName),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _selectedType = value);
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildAnalyzeButton(ThemeData theme) {
     return FilledButton.icon(
       onPressed: () => context.go(
@@ -199,6 +260,7 @@ class _NewDecisionScreenState extends State<NewDecisionScreen>
           'title': _titleController.text,
           'description': _descriptionController.text,
           'model': _selectedModel,
+          'decisionType': _selectedType.name,
         },
       ),
       icon: const Icon(Icons.auto_awesome_rounded),

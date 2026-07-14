@@ -7,6 +7,9 @@ class AnalysisResult {
   final String summary;
   final String usedModel;
   final DateTime analyzedAt;
+  final List<String> risks;
+  final String? bestChoice;
+  final String? reasoning;
 
   const AnalysisResult({
     required this.decisionTitle,
@@ -17,5 +20,8 @@ class AnalysisResult {
     required this.summary,
     required this.usedModel,
     required this.analyzedAt,
+    this.risks = const [],
+    this.bestChoice,
+    this.reasoning,
   });
 }

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 
+import '../../domain/enums/decision_type.dart';
 import '../../domain/interfaces/ai_provider.dart';
 import '../../domain/models/analysis_result.dart';
+import '../../services/prompt_builder.dart';
 
 class GeminiProvider extends AiProvider {
   final Dio _dio;
@@ -25,6 +27,7 @@ class GeminiProvider extends AiProvider {
   Future<AnalysisResult> analyze({
     required String title,
     required String description,
+    DecisionType decisionType = DecisionType.custom,
   }) async {
     final response = await _dio.post(
       '/gemini-pro:generateContent',
@@ -34,14 +37,14 @@ class GeminiProvider extends AiProvider {
             'parts': [
               {
                 'text':
-                    'You are a decision analysis assistant. Analyze the following decision and return ONLY valid JSON with keys: recommendation (string), pros (array of strings), cons (array of strings), summary (string), confidenceScore (number 0-1). No markdown, no code fences.\n\nDecision: $title\nContext: $description',
+                    '${PromptBuilder.buildSystemPrompt(decisionType)}\n\n${PromptBuilder.buildUserPrompt(title: title, description: description)}',
               },
             ],
           },
         ],
         'generationConfig': {
           'temperature': 0.7,
-          'maxOutputTokens': 1500,
+          'maxOutputTokens': 2000,
         },
       },
     );
@@ -58,13 +61,16 @@ class GeminiProvider extends AiProvider {
 
     return AnalysisResult(
       decisionTitle: title,
-      confidenceScore: (parsed['confidenceScore'] as num).toDouble(),
+      confidenceScore: (parsed['confidence'] as num).toDouble(),
       recommendation: parsed['recommendation'] as String,
       pros: List<String>.from(parsed['pros'] as List),
       cons: List<String>.from(parsed['cons'] as List),
       summary: parsed['summary'] as String,
       usedModel: displayName,
       analyzedAt: DateTime.now(),
+      risks: List<String>.from(parsed['risks'] as List? ?? []),
+      bestChoice: parsed['best_choice'] as String?,
+      reasoning: parsed['reasoning'] as String?,
     );
   }
 }

@@ -42,9 +42,11 @@ class AppRouter {
           final record = extra?['record'] as DecisionRecord?;
           return AnalysisResultScreen(
             title: record?.title ?? extra?['title'] as String?,
-            description: record?.description ?? extra?['description'] as String?,
+            description:
+                record?.description ?? extra?['description'] as String?,
             model: record?.model ?? extra?['model'] as String?,
             existingRecord: record,
+            decisionType: extra?['decisionType'] as String?,
           );
         },
       ),
