@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/routes.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/hero_card.dart';
 import '../widgets/recent_decisions_section.dart';
@@ -51,6 +53,12 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('DecisionAI'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_rounded),
+            onPressed: () => context.push(AppRoutes.settings),
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

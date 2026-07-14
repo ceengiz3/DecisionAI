@@ -5,6 +5,7 @@ import '../../features/analysis_result/presentation/screens/analysis_result_scre
 import '../../features/history/presentation/screens/history_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/new_decision/presentation/screens/new_decision_screen.dart';
+import '../../features/settings/presentation/screens/api_key_settings_screen.dart';
 import '../database/models/decision_record.dart';
 import 'routes.dart';
 
@@ -51,6 +52,11 @@ class AppRouter {
         path: AppRoutes.history,
         name: 'history',
         builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        name: 'settings',
+        builder: (context, state) => const ApiKeySettingsScreen(),
       ),
     ],
   );

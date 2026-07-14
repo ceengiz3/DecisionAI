@@ -6,4 +6,5 @@ abstract final class AppRoutes {
   static const String newDecision = '/new-decision';
   static const String analysisResult = '/analysis-result';
   static const String history = '/history';
+  static const String settings = '/settings';
 }
