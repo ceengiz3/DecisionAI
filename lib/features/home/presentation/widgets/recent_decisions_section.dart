@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/models/decision_record.dart';
+import '../../../../core/di/providers.dart';
 import '../../../../core/router/routes.dart';
-import '../providers/home_provider.dart';
 import 'decision_card.dart';
 
 class RecentDecisionsSection extends ConsumerWidget {

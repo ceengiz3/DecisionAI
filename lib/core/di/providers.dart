@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:isar/isar.dart';
+
 import '../constants/app_constants.dart';
+import '../database/isar_provider.dart';
+import '../database/models/decision_record.dart';
 import '../network/dio_client.dart';
 import '../network/network_info.dart';
 import '../router/app_router.dart';
@@ -82,3 +86,11 @@ class DefaultModelNotifier extends Notifier<String> {
     await ref.read(appSettingsServiceProvider).setDefaultModel(model);
   }
 }
+
+final recentDecisionsProvider = FutureProvider<List<DecisionRecord>>((ref) async {
+  final isar = await ref.watch(isarProvider.future);
+  return isar.decisionRecords.where()
+    .sortByCreatedAtDesc()
+    .limit(5)
+    .findAll();
+});

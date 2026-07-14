@@ -184,6 +184,7 @@ class _AnalysisResultScreenState
       record.reasoning = result.reasoning;
     }
     await IsarDatabase.saveDecision(record);
+    ref.invalidate(recentDecisionsProvider);
   }
 
   @override
