@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Home screen has Settings button in AppBar', (
+  testWidgets('Home screen has Settings buttons', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -11,7 +11,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byIcon(Icons.settings), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
+    // AppBar icon + FAB = 2 settings icons
+    expect(find.byIcon(Icons.settings), findsNWidgets(2));
   });
 }

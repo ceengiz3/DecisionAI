@@ -54,15 +54,23 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('DecisionAI'),
         actions: [
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            icon: const Icon(Icons.settings, size: 20),
-            label: const Text('Settings'),
-            onPressed: () => context.go(AppRoutes.settings),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Open Settings',
+            onPressed: () {
+              debugPrint('HOME_SCREEN: Settings button pressed, navigating to ${AppRoutes.settings}');
+              context.go(AppRoutes.settings);
+            },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.small(
+        heroTag: 'settings_fab',
+        onPressed: () {
+          debugPrint('HOME_SCREEN: Settings FAB pressed, navigating to ${AppRoutes.settings}');
+          context.go(AppRoutes.settings);
+        },
+        child: const Icon(Icons.settings),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
